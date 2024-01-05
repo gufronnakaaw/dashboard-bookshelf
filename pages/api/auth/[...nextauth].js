@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 export default NextAuth({
   session: {
     strategy: 'jwt',
+    maxAge: 1 * 60 * 60, // 1 hour
   },
   secret: 'bookshelfjwt',
   providers: [
@@ -19,6 +20,7 @@ export default NextAuth({
         if (username == 'testing' && password == 'testing123') {
           return {
             email: 'testing@mail.com',
+            fullname: 'Testing User',
           };
         } else {
           return null;
@@ -27,11 +29,12 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
-      return token;
+    async jwt({ token, user }) {
+      return { ...token, ...user };
     },
 
     async session({ session, token }) {
+      session.user = token;
       return session;
     },
   },
