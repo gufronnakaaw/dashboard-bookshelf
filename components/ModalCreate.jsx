@@ -10,7 +10,7 @@ import {
 } from '@material-tailwind/react';
 import { useState } from 'react';
 
-export function ModalCreate({ open, setOpen, mutate }) {
+export default function ModalCreate({ open, setOpen, mutate }) {
   const [value, setValue] = useState({});
 
   function handleValue(e) {

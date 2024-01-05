@@ -1,6 +1,7 @@
 import Layout from '@/components/Layout';
 import Loading from '@/components/Loading';
-import { ModalCreate } from '@/components/ModalCreate';
+import ModalCreate from '@/components/ModalCreate';
+import ModalDetail from '@/components/ModalDetail';
 import fetcher from '@/utils/fetcher';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import {
@@ -21,19 +22,19 @@ import {
   Typography,
 } from '@material-tailwind/react';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
 
 const TABLE_HEAD = ['No', 'Name', 'Year', 'Author', 'Publisher', 'Action'];
 
 export default function Home(props) {
-  const [open, setOpen] = useState(false);
   const [page, setPage] = useState(props.books.page);
-  const [client, setClient] = useState(false);
-
-  useEffect(() => {
-    setClient(true);
-  }, []);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailBook, setDetailBook] = useState({
+    page_count: 0,
+    summary: '',
+  });
 
   const {
     data: books,
@@ -56,10 +57,6 @@ export default function Home(props) {
 
   if (isLoading) {
     return <Loading />;
-  }
-
-  if (!client) {
-    return;
   }
 
   let startIndex = (books.page - 1) * 10;
@@ -95,7 +92,7 @@ export default function Home(props) {
                 <Button
                   className="flex items-center gap-3"
                   size="sm"
-                  onClick={() => setOpen(true)}
+                  onClick={() => setOpenCreate(true)}
                 >
                   <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add book
                 </Button>
@@ -186,7 +183,18 @@ export default function Home(props) {
                       </td>
                       <td className={classes}>
                         <Tooltip content="Detail Book">
-                          <IconButton variant="text">
+                          <IconButton
+                            variant="text"
+                            onClick={() => {
+                              const { page_count, summary } = book;
+
+                              setDetailBook({
+                                page_count,
+                                summary,
+                              });
+                              setOpenDetail(true);
+                            }}
+                          >
                             <EyeIcon className="h-4 w-4" />
                           </IconButton>
                         </Tooltip>
@@ -242,11 +250,15 @@ export default function Home(props) {
             </div>
           </CardFooter>
         </Card>
-
-        {open ? (
-          <ModalCreate open={open} setOpen={setOpen} mutate={mutate} />
-        ) : null}
       </Layout>
+
+      <ModalCreate open={openCreate} setOpen={setOpenCreate} mutate={mutate} />
+
+      <ModalDetail
+        open={openDetail}
+        setOpen={setOpenDetail}
+        data={detailBook}
+      />
     </>
   );
 }
